@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore sampling, the Nyquist frequency, aliasing, and the Fourier transform of a sinusoid.">
+  <title>Nyquist Sampling Demonstrator</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23173554'/%3E%3Cpath d='M3 16Q9 0 16 16T29 16' fill='none' stroke='%235ad5e0' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Sampling &amp; Fourier analysis</p>
+    <h1>Nyquist Sampling Demonstrator</h1>
+    <p>Sample a sine wave and discover the frequency you actually observe. Change the cadence or duration to see their different effects.</p>
+    <p class="equation"><span>x(t) = sin(2π f<sub>signal</sub> t)</span><span>f<sub>Nyquist</sub> = f<sub>s</sub> / 2 = 1 / (2Δt)</span></p>
+  </header>
+
+  <div class="workspace">
+  <section class="panel control-panel" aria-label="Signal controls and derived quantities">
+    <div class="controls">
+      <div class="control">
+        <label for="frequency">True signal frequency <span>Hz</span></label>
+        <input id="frequency" type="number" min="0.01" max="10" step="any" value="1" inputmode="decimal" aria-describedby="frequency-help">
+        <input id="frequency-slider" type="range" min="0.01" max="10" step="0.01" value="1" aria-label="True signal frequency in Hz">
+        <small id="frequency-help">0.01–10 Hz</small>
+      </div>
+      <div class="control">
+        <label for="cadence">Sampling cadence Δt <span>s</span></label>
+        <input id="cadence" type="number" min="0.01" max="2" step="any" value="0.25" inputmode="decimal" aria-describedby="cadence-help">
+        <input id="cadence-slider" type="range" min="0.01" max="2" step="0.01" value="0.25" aria-label="Sampling cadence in seconds">
+        <small id="cadence-help">0.01–2 s · sets the Nyquist limit</small>
+      </div>
+      <div class="control">
+        <label for="duration">Time-series duration T <span>s</span></label>
+        <input id="duration" type="number" min="0.02" max="30" step="any" value="10" inputmode="decimal" aria-describedby="duration-help">
+        <input id="duration-slider" type="range" min="0.02" max="30" step="0.01" value="10" aria-label="Time-series duration in seconds">
+        <small id="duration-help">0.02–30 s · sets frequency resolution</small>
+      </div>
+    </div>
+    <dl class="metrics" aria-label="Derived quantities">
+      <div><dt>Sampling frequency f<sub>s</sub></dt><dd id="sampling-value"></dd></div>
+      <div><dt>Nyquist frequency</dt><dd id="nyquist-value"></dd></div>
+      <div><dt>Number of samples</dt><dd id="samples-value"></dd></div>
+      <div><dt>Resolution ≈ 1/T</dt><dd id="resolution-value"></dd></div>
+      <div><dt>Expected observed frequency</dt><dd id="alias-value"></dd></div>
+    </dl>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <div class="plots">
+  <section class="panel plot-panel" aria-labelledby="time-heading">
+    <div class="plot-heading"><h2 id="time-heading">Time domain</h2><div class="legend"><span class="true">True signal</span><span class="samples">Samples</span><span class="alias" id="alias-legend" hidden>Aliased sine</span></div></div>
+    <div id="time-plot" class="plot"></div>
+    <p class="plot-note">Samples start at t = 0 and stop before T. Hover or tap a sample to inspect it.</p>
+  </section>
+
+  <section class="panel plot-panel" aria-labelledby="fourier-heading">
+    <div class="plot-heading"><h2 id="fourier-heading">Frequency domain</h2><p id="peak-value"></p></div>
+    <div id="frequency-plot" class="plot"></div>
+    <p id="spectrum-note" class="plot-note"></p>
+  </section>
+
+  </div>
+  </div>
+
+  <section class="explanation" aria-label="How to interpret the plots">
+    <p>A sinusoidal signal can be uniquely represented by uniformly spaced samples only when its frequency is below half the sampling frequency. Frequencies above the Nyquist frequency are reflected or folded into the observable frequency range and therefore appear as aliases.</p>
+    <div class="concepts"><p><strong>Cadence sets the maximum recoverable frequency.</strong> Decreasing Δt raises f<sub>s</sub> and the Nyquist frequency.</p><p><strong>Duration sets the Fourier frequency resolution.</strong> Increasing T makes the frequency bins finer, approximately Δf = 1/T.</p></div>
+    <p class="plot-note">Try 1, 3, and 5 Hz with a cadence of 0.25 s: all three produce a peak near 1 Hz. A finite observation can spread power across nearby bins when it contains a non-integer number of cycles.</p>
+  </section>
+  <noscript>Please enable JavaScript to use this demonstrator.</noscript>
+</main>
+</body>
+</html>
