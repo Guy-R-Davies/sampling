@@ -157,14 +157,14 @@ if (typeof document !== "undefined") {
     $("alias-value").textContent = `${fmt(alias.frequency)} Hz`;
     const messages = [];
     if (atNyquist) {
-      messages.push(`Signal is exactly at Nyquist (${fmt(nyquist)} Hz). This zero-phase sine is sampled at its zero crossings, so its samples vanish. Unique recovery requires a frequency strictly below Nyquist.`);
+      messages.push("At Nyquist · samples vanish.");
     } else if (aliased) {
-      messages.push(`Signal is above the Nyquist frequency and will be aliased to ${fmt(alias.frequency)} Hz.`);
+      messages.push(`Aliased → ${fmt(alias.frequency)} Hz`);
     } else {
-      messages.push("Signal is below Nyquist and adequately sampled according to the basic Nyquist criterion.");
+      messages.push("Below Nyquist");
     }
-    if (samples.values.length < 2) messages.push("Only one sample is available: there is too little data to measure a Fourier frequency. Increase the duration or decrease the cadence.");
-    else if (!spectrum.peak && !atNyquist) messages.push("All sampled values are zero: this phase and cadence hide the sine wave, so there is no measurable Fourier peak.");
+    if (samples.values.length < 2) messages.push("One sample · increase duration.");
+    else if (!spectrum.peak && !atNyquist) messages.push("Samples all zero · no peak.");
     $("status").textContent = messages.join(" ");
     $("status").classList.toggle("warning", aliased || atNyquist || !spectrum.peak);
     $("alias-legend").hidden = !aliased;
@@ -173,7 +173,7 @@ if (typeof document !== "undefined") {
     const fineCount = Math.max(1000, Math.ceil(20 * frequency * duration), Math.ceil(10 * duration / state.cadence));
     const fineTimes = Array.from({ length: fineCount + 1 }, (_, i) => duration * i / fineCount);
     const trueValues = fineTimes.map(t => Math.sin(2 * Math.PI * frequency * t));
-    const timePlot = createPlot($("time-plot"), duration, -1.25, 1.25, "Time [s]", "Signal amplitude",
+    const timePlot = createPlot($("time-plot"), duration, -1.25, 1.25, "Time [s]", "Amplitude",
       `True ${fmt(frequency)} Hz sine wave and ${samples.values.length} samples over ${fmt(duration)} seconds${aliased ? `, with an alias at ${fmt(alias.frequency)} Hz` : ""}.`);
     line(timePlot, fineTimes, trueValues, colours.true);
     // A negative folded frequency reverses sine's phase and passes through the samples.
@@ -181,7 +181,7 @@ if (typeof document !== "undefined") {
     markers(timePlot, samples.times, samples.values, (t, value) => `t = ${fmt(t)} s · x = ${fmt(value)}`, samples.values.length > 300 ? 2.5 : 4.5);
 
     const amplitudeMax = Math.max(1.15, ...spectrum.amplitudes.map(a => a * 1.15));
-    const fourierPlot = createPlot($("frequency-plot"), nyquist, 0, amplitudeMax, "Frequency [Hz]", "Fourier amplitude",
+    const fourierPlot = createPlot($("frequency-plot"), nyquist, 0, amplitudeMax, "Frequency [Hz]", "Amplitude",
       `Single-sided amplitude spectrum of the sampled data, from zero to Nyquist at ${fmt(nyquist)} Hz. ${spectrum.peak ? `Dominant Fourier bin: ${fmt(spectrum.peak.frequency)} Hz.` : "No measurable Fourier peak."}`);
     line(fourierPlot, spectrum.frequencies, spectrum.amplitudes, colours.true);
     fourierPlot.svg.append(element("line", { x1: fourierPlot.right, x2: fourierPlot.right, y1: fourierPlot.margin.top, y2: fourierPlot.bottom, stroke: colours.alias, "stroke-dasharray": "5 4" }));
@@ -190,8 +190,8 @@ if (typeof document !== "undefined") {
       fourierPlot.data.append(element("line", { x1: fourierPlot.x(spectrum.peak.frequency), x2: fourierPlot.x(spectrum.peak.frequency), y1: fourierPlot.y(spectrum.peak.amplitude), y2: fourierPlot.bottom, stroke: colours.sample, "stroke-dasharray": "3 4" }));
       markers(fourierPlot, [spectrum.peak.frequency], [spectrum.peak.amplitude], (f, a) => `f = ${fmt(f)} Hz · A = ${fmt(a)}`, 5);
     }
-    $("peak-value").textContent = spectrum.peak ? `Dominant bin: ${fmt(spectrum.peak.frequency)} Hz` : "No measurable Fourier peak";
-    $("spectrum-note").textContent = `DFT of ${samples.values.length} samples · actual bin spacing 1/(NΔt) = ${fmt(spectrum.binSpacing)} Hz. When T/Δt is not an integer, NΔt differs slightly from T. No window or zero padding is applied.${samples.values.length % 2 ? " With an odd number of samples, the last Fourier bin lies below Nyquist." : ""}`;
+    $("peak-value").textContent = spectrum.peak ? `Peak ${fmt(spectrum.peak.frequency)} Hz` : "No peak";
+    $("spectrum-note").textContent = `Bin spacing ${fmt(spectrum.binSpacing)} Hz`;
   }
 
   function scheduleRender() {
